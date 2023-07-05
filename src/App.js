@@ -21,6 +21,25 @@ function App() {
     setLocalStorageData(data);
   };
 
+  const formatDateTime = (timestamp) => {
+    const dateObj = new Date(timestamp);
+    const date = dateObj.getDate();
+    const month = dateObj.getMonth() + 1;
+    const year = dateObj.getFullYear();
+    const hours = dateObj.getHours();
+    const minutes = dateObj.getMinutes();
+    const seconds = dateObj.getSeconds();
+    const formattedDate = `${padNumber(date)}/${padNumber(month)}/${year}`;
+    const formattedTime = `${padNumber(hours)}:${padNumber(
+      minutes
+    )}:${padNumber(seconds)}`;
+    return { formattedDate, formattedTime };
+  };
+
+  const padNumber = (num) => {
+    return num.toString().padStart(2, "0");
+  };
+
   const addToLocalStorage = () => {
     if (item.length === 0) {
       setError(true);
@@ -30,7 +49,7 @@ function App() {
       return;
     }
     const randomKey = Math.random().toString();
-    const newItem = { item };
+    const newItem = { item, timestamp: new Date().toISOString() };
     localStorage.setItem(randomKey, JSON.stringify(newItem));
     loadDataFromLocalStorage();
     setItem("");
@@ -86,7 +105,7 @@ function App() {
             <tr className="table-header">
               <th
                 className="table-cell"
-                colSpan={4}
+                colSpan={6}
                 style={{ textAlign: "center" }}
               >
                 Items List
@@ -96,30 +115,43 @@ function App() {
 
           <tbody>
             {localStorageData.length > 0 &&
-              localStorageData.map((item, index) => (
-                <tr key={item.key} className="table-row">
-                  <td className="table-cell_sno">
-                    <b>{index + 1}</b>
-                  </td>
-                  <td className="table-cell">{item.value.item}</td>
-                  <td className="table-cell_b" style={{ textAlign: "center" }}>
-                    <button
-                      className="delete-button"
-                      onClick={() => deleteFromLocalStorage(item.key)}
+              localStorageData.map((item, index) => {
+                const { formattedDate, formattedTime } = formatDateTime(
+                  item.value.timestamp
+                );
+                return (
+                  <tr key={item.key} className="table-row">
+                    <td className="table-cell_sno">
+                      <b>{index + 1}</b>
+                    </td>
+                    <td className="table-cell">{item.value.item}</td>
+                    <td className="table-cell_time">{formattedTime}</td>
+                    <td className="table-cell_time">{formattedDate}</td>
+                    <td
+                      className="table-cell_b"
+                      style={{ textAlign: "center" }}
                     >
-                      Completed
-                    </button>
-                  </td>
-                  <td className="table-cell_b" style={{ textAlign: "center" }}>
-                    <button
-                      className="update-button"
-                      onClick={() => updateFromLocalStorage(item.key)}
+                      <button
+                        className="delete-button"
+                        onClick={() => deleteFromLocalStorage(item.key)}
+                      >
+                        Completed
+                      </button>
+                    </td>
+                    <td
+                      className="table-cell_b"
+                      style={{ textAlign: "center" }}
                     >
-                      Update
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                      <button
+                        className="update-button"
+                        onClick={() => updateFromLocalStorage(item.key)}
+                      >
+                        Update
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
           </tbody>
         </table>
       </div>
